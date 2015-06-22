@@ -2,21 +2,23 @@ package com.machao.mediaplayer;
 
 
 
-import java.io.IOException;
+import java.io.File;
 
 import android.app.Activity;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
+import android.media.MediaPlayer.OnErrorListener;
 import android.os.Bundle;
-import android.view.SurfaceHolder;
-import android.view.SurfaceHolder.Callback;
-import android.view.SurfaceView;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements OnClickListener{
 	MediaPlayer mediaplayer;
-	private SurfaceView sv;
-	private static int progress = 0;
+	private EditText et;
+	private Button bt_play,bt_pause,bt_replay,bt_stop;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -24,73 +26,100 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		sv = (SurfaceView)findViewById(R.id.sv);
-		sv.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-		sv.getHolder().addCallback(new Callback() {
-			
-			@Override
-			public void surfaceDestroyed(SurfaceHolder arg0) {
-				// TODO Auto-generated method stub
-				if(mediaplayer != null && mediaplayer.isPlaying()){
-					progress = mediaplayer.getCurrentPosition();
-					mediaplayer.stop();
-				}
-			}
-			
-			@Override
-			public void surfaceCreated(SurfaceHolder arg0) {
-				// TODO Auto-generated method stub
-				if(progress > 0) {
-					//play(null);
-				}
-			}
-			
-			@Override
-			public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
+		et = (EditText)findViewById(R.id.et);
+		bt_play = (Button)findViewById(R.id.play);
+		bt_pause = (Button)findViewById(R.id.pause);
+		bt_replay = (Button)findViewById(R.id.replay);
+		bt_stop = (Button)findViewById(R.id.stop);
 		
-		mediaplayer = new MediaPlayer();
-		
-		mediaplayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-		
-
-		
-		mediaplayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-			
-			@Override
-			public void onCompletion(MediaPlayer mp) {
-				// TODO Auto-generated method stub
-				mediaplayer.start();
-			}
-		});
-		
-		
+		bt_play.setOnClickListener(this);
+		bt_pause.setOnClickListener(this);
+		bt_replay.setOnClickListener(this);
+		bt_stop.setOnClickListener(this);
 	}
 	
-	public void play(View view){
+	@Override
+	public void onClick(View v){
+		switch(v.getId()){
+		case R.id.play:
+			play();
+			break;
+		case R.id.pause:
+			pause();
+			break;
+		case R.id.replay:
+			replay();
+			break;
+		case R.id.stop:
+			stop();
+			break;
+		}
+	}
+	
+	public void play(){
 		
-		try {
-			mediaplayer.setDataSource("/storage/extSdCard/mp3/渡情.flv");
-			mediaplayer.setDisplay(sv.getHolder());
-//			mediaplayer.setLooping(true);
-			mediaplayer.prepareAsync();
-			mediaplayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-				
-				@Override
-				public void onPrepared(MediaPlayer mp) {
-					// TODO Auto-generated method stub
-					mp.start();
-					mp.seekTo(progress);
-				}
-			});
+		String path = et.getText().toString().trim();
+		File file = new File(path);
+		if (file.exists() && file.length() > 0) {
 			
-			System.out.println("播放OK！");
-		} catch (Exception e) {
-			System.out.println("播放出错！");
-			e.printStackTrace();
+			try {
+				mediaplayer = new MediaPlayer();
+				mediaplayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+				mediaplayer.setOnCompletionListener(new OnCompletionListener() {
+					
+					@Override
+					public void onCompletion(MediaPlayer mp) {
+						// TODO Auto-generated method stub
+						bt_play.setEnabled(true);
+					}
+				});
+				
+				mediaplayer.setOnErrorListener(new OnErrorListener() {
+					
+					@Override
+					public boolean onError(MediaPlayer arg0, int arg1, int arg2) {
+						// Tbt_play.setEnabled(true);
+						bt_play.setEnabled(true);
+						return true;
+					}
+				});
+				mediaplayer.setDataSource(path);
+				mediaplayer.prepare();
+				mediaplayer.start();
+				System.out.println("播放OK！");
+				bt_play.setEnabled(false);
+			} catch (Exception e) {
+				System.out.println("播放出错！");
+				e.printStackTrace();
+			}
+		}
+		else {
+			System.out.println("播放的文件不存在");
+		}
+		
+	}
+	public void pause(){
+		if("暂停".equals(bt_pause.getText().toString().trim())){
+			mediaplayer.pause();
+			bt_pause.setText("继续");
+		}
+		else if (mediaplayer != null && mediaplayer.isPlaying() == false){
+			mediaplayer.start();
+			bt_pause.setText("暂停");
+		}
+	}
+	public void replay(){
+		if(mediaplayer != null && mediaplayer.isPlaying()){
+			mediaplayer.seekTo(0);
+			bt_pause.setText("暂停");
+		}
+		play();
+	}
+
+	public void stop(){
+		if(mediaplayer != null && mediaplayer.isPlaying()){
+			mediaplayer.stop();
+			bt_play.setEnabled(true);
 		}
 	}
 
@@ -98,11 +127,9 @@ public class MainActivity extends Activity {
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
-		mediaplayer.stop();
-		mediaplayer.release();
-		progress = 0;
+		if (mediaplayer != null) {
+			mediaplayer.stop();
+			mediaplayer.release();
+		}
 	}
-
-
-
 }

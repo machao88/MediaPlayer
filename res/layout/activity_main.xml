@@ -5,16 +5,45 @@
     android:orientation="vertical"
     >
 
-    <Button
-        android:id="@+id/button1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="播放"
-        android:onClick="play" />
-    <SurfaceView
-        android:id="@+id/sv"
+    <EditText
+        android:id="@+id/et"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        />
+        android:layout_height="wrap_content" />
     
+    <LinearLayout 
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:orientation="horizontal"
+    >
+    
+	    <Button
+	        android:id="@+id/play"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="播放"
+	        android:layout_weight="1"
+	         />
+	     <Button
+	        android:id="@+id/pause"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="暂停"
+	        android:layout_weight="1"
+	         />
+	      <Button
+	        android:id="@+id/replay"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="重播"
+	        android:layout_weight="1"
+	         />
+	       <Button
+	        android:id="@+id/stop"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="停止"
+	        android:layout_weight="1"
+	         />
+    	</LinearLayout>
+
 </LinearLayout>
