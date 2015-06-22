@@ -8,58 +8,26 @@ import android.app.Activity;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnPreparedListener;
+import android.media.SoundPool;
 import android.os.Bundle;
+import android.view.View;
 
 public class MainActivity extends Activity {
 	MediaPlayer mediaplayer;
+	SoundPool soundPool;
+	private int soundid;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
-		mediaplayer = new MediaPlayer();
-		mediaplayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-		try {
-			mediaplayer.setDataSource("/mnt/sdcard/新娘不是我.mp3");
-			mediaplayer.setLooping(true);
-			mediaplayer.prepareAsync();
-			
-			mediaplayer.setOnPreparedListener(new OnPreparedListener() {
-				
-				@Override
-				public void onPrepared(MediaPlayer arg0) {
-					// TODO Auto-generated method stub
-					mediaplayer.start();
-				}
-			});
-			
-			System.out.println("播放OK！");
-			
-		} catch (Exception e) {
-			System.out.println("播放出错！");
-			e.printStackTrace();
-		}
-		
-		/*			mediaplayer.setOnCompletionListener(new OnCompletionListener() {
-		
-		@Override
-		public void onCompletion(MediaPlayer mp) {
-			// TODO Auto-generated method stub
-			mediaplayer.start();
-		}
-	});*/
-		
-		
+		soundPool = new SoundPool(5, AudioManager.STREAM_MUSIC, 0);
+		soundid = soundPool.load(this, R.raw.ring, 1);
 	}
 
-	@Override
-	protected void onDestroy() {
-		// TODO Auto-generated method stub
-		super.onDestroy();
-		mediaplayer.stop();
-		mediaplayer.release();
+	public void click(View view){
+		soundPool.play(soundid, 1.0f, 1.0f, 0, 0, 1.0f);
 	}
 
 
