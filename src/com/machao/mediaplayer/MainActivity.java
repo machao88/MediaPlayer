@@ -9,16 +9,21 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
+import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 
 public class MainActivity extends Activity implements OnClickListener{
 	MediaPlayer mediaplayer;
 	private EditText et;
 	private Button bt_play,bt_pause,bt_replay,bt_stop;
+	private SeekBar sb;
+	private boolean isPlaying;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +32,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		setContentView(R.layout.activity_main);
 		
 		et = (EditText)findViewById(R.id.et);
+		sb = (SeekBar)findViewById(R.id.sb);
 		bt_play = (Button)findViewById(R.id.play);
 		bt_pause = (Button)findViewById(R.id.pause);
 		bt_replay = (Button)findViewById(R.id.replay);
@@ -36,6 +42,30 @@ public class MainActivity extends Activity implements OnClickListener{
 		bt_pause.setOnClickListener(this);
 		bt_replay.setOnClickListener(this);
 		bt_stop.setOnClickListener(this);
+		
+		sb.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+			
+			@Override
+			public void onStopTrackingTouch(SeekBar sb1) {
+				// TODO Auto-generated method stub
+				int current = sb1.getProgress();
+				if (mediaplayer != null && mediaplayer.isPlaying()){
+					mediaplayer.seekTo(current);
+				}
+			}
+			
+			@Override
+			public void onStartTrackingTouch(SeekBar arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onProgressChanged(SeekBar arg0, int arg1, boolean arg2) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 	}
 	
 	@Override
@@ -71,6 +101,33 @@ public class MainActivity extends Activity implements OnClickListener{
 					public void onCompletion(MediaPlayer mp) {
 						// TODO Auto-generated method stub
 						bt_play.setEnabled(true);
+					}
+				});
+				mediaplayer.setOnPreparedListener(new OnPreparedListener() {
+					
+					@Override
+					public void onPrepared(MediaPlayer arg0) {
+						// TODO Auto-generated method stub
+						int max = mediaplayer.getDuration();
+						sb.setMax(max);
+						
+						new Thread(){
+							public void run(){
+								isPlaying = true;
+								while (isPlaying){
+									int position = mediaplayer.getCurrentPosition();
+									sb.setProgress(position);
+									try {
+										Thread.sleep(500);
+									} catch (InterruptedException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								}
+							}
+						}.start();
+						
+						
 					}
 				});
 				
